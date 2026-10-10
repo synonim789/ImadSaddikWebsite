@@ -10,11 +10,11 @@ on:
 jobs:
   frontend-lint-format-check:
     name: Frontend lint
-    uses: ./.github/workflows/frontend-lint-format-check.yaml
+    uses: ./.github/workflows/frontend-lint-format-check.yml
 
   backend-lint-format-check:
     name: Backend lint
-    uses: ./.github/workflows/backend-lint-format-check.yaml
+    uses: ./.github/workflows/backend-lint-format-check.yml
 
   frontend-unit-tests:
     name: Frontend tests
