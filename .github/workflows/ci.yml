@@ -43,7 +43,7 @@ jobs:
   backend-integration-tests:
     name: Backend
     needs: backend-unit-tests
-    uses: ./.github/workflows/backend-integration-tests.yml'
+    uses: ./.github/workflows/backend-integration-tests.yml
 
   e2e-tests:
     name: E2E
