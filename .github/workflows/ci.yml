@@ -56,6 +56,11 @@ jobs:
     uses: ./.github/workflows/dast-scan.yml
     secrets: inherit
 
+  frontend-build:
+    name: Frontend
+    needs: e2e-tests
+    uses: ./.github/workflows/frontend-build.yml
+
   pipeline-success:
     name: Pipeline success
     needs:
@@ -70,6 +75,7 @@ jobs:
         backend-integration-tests,
         e2e-tests,
         dast-check,
+        frontend-build,
       ]
     runs-on: ubuntu-latest
     if: always()
