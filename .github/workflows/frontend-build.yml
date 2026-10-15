@@ -29,9 +29,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build frontend
+        run: pnpm build
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
         with:
           name: frontend-build
-          path: frontend/workflow_dispatch
+          path: frontend/dist
           retention-days: 1
