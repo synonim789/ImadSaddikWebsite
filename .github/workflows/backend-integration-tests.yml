@@ -4,11 +4,11 @@ on:
   workflow_call:
 
 env:
-  MEILISEARCH_MASTER_KEY: "aStrongMasterKeyForTestingPurposes"
-  MEILISEARCH_URL: "http://localhost:7700"
-  MEILISEARCH_INDEX_NAME: "articles_test"
-  MEILISEARCH_DOWNLOAD_MAX_RETRIES: "3"
-  MEILISEARCH_DOWNLOAD_RETRY_DELAY: "5"
+  MEILISEARCH_MASTER_KEY: 'aStrongMasterKeyForTestingPurposes'
+  MEILISEARCH_URL: 'http://localhost:7700'
+  MEILISEARCH_INDEX_NAME: 'articles_test'
+  MEILISEARCH_DOWNLOAD_MAX_RETRIES: '3'
+  MEILISEARCH_DOWNLOAD_RETRY_DELAY: '5'
 
 jobs:
   tests:
@@ -24,8 +24,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
-          cache: "pip"
+          python-version: '3.13'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements-dev.txt

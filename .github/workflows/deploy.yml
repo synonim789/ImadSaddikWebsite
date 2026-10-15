@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://imadsaddik.com
+      url: https://setupfultowicz.online
 
     steps:
       - name: Check out repository
@@ -43,10 +43,8 @@ jobs:
             BACKUP_RETENTION_COUNT=5
             TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-            # 1. Create backup directory
             mkdir -p $BACKUP_DIR
 
-            # 2. Backup SQLite database
             echo "Backing up SQLite database..."
             if [ -f "$BACKEND_DIR/visitors.db" ]; then
               cp "$BACKEND_DIR/visitors.db" "$BACKUP_DIR/visitors_$TIMESTAMP.db"
@@ -55,7 +53,6 @@ jobs:
               echo "Warning: No SQLite database found in $BACKEND_DIR"
             fi
 
-            # 3. Backup Meilisearch
             echo "Triggering Meilisearch dump..."
             if [ -z "$MEILISEARCH_KEY" ]; then
               echo "Error: MEILISEARCH_KEY secret is empty."
@@ -113,7 +110,6 @@ jobs:
               exit 1
             fi
 
-            # 4. Rolling Retention
             echo "Cleaning old backups..."
             sudo /usr/local/bin/clean_backups.sh $BACKUP_RETENTION_COUNT
             echo "Backup process finished successfully."
@@ -124,8 +120,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.DIGITAL_OCEAN_HOST_IP }}
           REMOTE_USER: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          SOURCE: "./"
-          TARGET: "/web_app/"
+          SOURCE: './'
+          TARGET: '/web_app/'
           ARGS: "-avzr --delete --exclude-from='rsync_exclude.txt'"
 
       - name: Create backend .env file
@@ -184,27 +180,6 @@ jobs:
             fi
             deactivate
 
-            echo "Copying custom files from backup venv..."
-            # Copy gunicorn_start script
-            if [ -f "venv_backup/bin/gunicorn_start" ]; then
-              cp venv_backup/bin/gunicorn_start venv/bin/gunicorn_start
-              chmod +x venv/bin/gunicorn_start
-              echo "Copied gunicorn_start script."
-            fi
-
-            # Copy logs directory (preserve existing logs)
-            if [ -d "venv_backup/logs" ]; then
-              cp -r venv_backup/logs venv/
-              echo "Copied logs directory."
-            else
-              mkdir -p venv/logs
-              echo "Created new logs directory."
-            fi
-
-            # Create run directory for socket file
-            mkdir -p venv/run
-            echo "Created run directory for socket."
-
             # Clean up backup after successful deploy
             if [ -d "venv_backup" ]; then
               rm -rf venv_backup
@@ -223,7 +198,7 @@ jobs:
             set -e
 
             echo "Restarting FastAPI backend service..."
-            if sudo supervisorctl restart imadsaddik_com; then
+            if sudo supervisorctl restart all; then
               echo "FastAPI backend restarted successfully."
             else
               echo "Error: Failed to restart FastAPI backend."
@@ -232,11 +207,11 @@ jobs:
 
             # Verify the service is running
             sleep 5
-            if sudo supervisorctl status imadsaddik_com | grep -q "RUNNING"; then
+            if sudo supervisorctl status all | grep -q "RUNNING"; then
               echo "FastAPI backend is running."
             else
               echo "Error: FastAPI backend failed to start properly."
-              sudo supervisorctl status imadsaddik_com
+              sudo supervisorctl status all
               exit 1
             fi
 

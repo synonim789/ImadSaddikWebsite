@@ -9,40 +9,34 @@ on:
 
 jobs:
   frontend-vulnerability-check:
-    name: Frontend
+    name: Frontend vulnerability
     uses: ./.github/workflows/frontend-vulnerability-check.yml
 
   backend-vulnerability-check:
-    name: Backend
+    name: Backend vulnerability
     uses: ./.github/workflows/backend-vulnerability-check.yml
 
   backend-sast-check:
-    name: Backend
+    name: Backend SAST
     uses: ./.github/workflows/backend-sast-check.yml
 
   frontend-lint-format-check:
-    name: Frontend
+    name: Frontend lint
     needs: frontend-vulnerability-check
     uses: ./.github/workflows/frontend-lint-format-check.yml
 
   backend-lint-format-check:
-    name: Backend
+    name: Backend lint
     needs: [backend-vulnerability-check, backend-sast-check]
     uses: ./.github/workflows/backend-lint-format-check.yml
 
-  dast-check:
-    name: Backend
-    needs: backend-lint-format-check
-    uses: ./.github/workflows/dast-scan.yml
-    secrets: inherit
-
   frontend-unit-tests:
-    name: Frontend
+    name: Frontend tests
     needs: frontend-lint-format-check
     uses: ./.github/workflows/frontend-unit-tests.yml
 
   backend-unit-tests:
-    name: Backend
+    name: Backend tests
     needs: backend-lint-format-check
     uses: ./.github/workflows/backend-unit-tests.yml
 
@@ -56,22 +50,41 @@ jobs:
     needs: [frontend-unit-tests, backend-integration-tests]
     uses: ./.github/workflows/e2e-tests.yml
 
+  dast-check:
+    name: Backend
+    needs: backend-lint-format-check
+    uses: ./.github/workflows/dast-scan.yml
+    secrets: inherit
+
   frontend-build:
     name: Frontend
-    needs: [e2e-tests, dast-check]
+    needs: e2e-tests
     uses: ./.github/workflows/frontend-build.yml
 
   pipeline-success:
     name: Pipeline success
-    needs: frontend-build
+    needs:
+      [
+        frontend-vulnerability-check,
+        backend-vulnerability-check,
+        backend-sast-check,
+        frontend-lint-format-check,
+        backend-lint-format-check,
+        frontend-unit-tests,
+        backend-unit-tests,
+        backend-integration-tests,
+        e2e-tests,
+        dast-check,
+        frontend-build,
+      ]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Pipeline succeeded
-        if: needs.frontend-build.result == 'success'
+        if: "!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
         run: echo "All checks passed successfully!"
       - name: Pipeline failed
-        if: needs.frontend-build.result != 'success'
+        if: "contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')"
         run: |
-          echo "Some checks failed, were cancelled, or skipped."
+          echo "Some checks failed or were cancelled."
           exit 1
